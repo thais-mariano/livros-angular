@@ -1,16 +1,16 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';  // Importar CommonModule
+import { CommonModule } from '@angular/common';
 import { ControleEditoraService } from '../controle-editora.service';
 import { ControleLivrosService } from '../controle-livros.service';
 import { Editora } from '../editora';
 import { Livro } from '../livro';
 
 @Component({
-  standalone: true,  // Torna o componente standalone
+  standalone: true,
   selector: 'app-livro-lista',
   templateUrl: './livro-lista.component.html',
   styleUrls: ['./livro-lista.component.css'],
-  imports: [CommonModule]  // Adiciona CommonModule para habilitar *ngFor e *ngIf
+  imports: [CommonModule]
 })
 export class LivroListaComponent {
   public editoras: Array<Editora> = [];
