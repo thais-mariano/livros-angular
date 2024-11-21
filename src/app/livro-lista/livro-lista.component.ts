@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControleEditoraService } from '../controle-editora.service';
 import { ControleLivrosService } from '../controle-livros.service';
@@ -12,7 +12,7 @@ import { Livro } from '../livro';
   styleUrls: ['./livro-lista.component.css'],
   imports: [CommonModule]
 })
-export class LivroListaComponent {
+export class LivroListaComponent implements OnInit {
   public editoras: Array<Editora> = [];
   public livros: Array<Livro> = [];
 
@@ -22,14 +22,28 @@ export class LivroListaComponent {
   ) {}
 
   ngOnInit(): void {
-    this.editoras = this.servEditora.getEditoras();
-    this.livros = this.servLivros.obterLivros();
+
+    this.servLivros
+      .obterLivros()
+      .then((livros: Livro[]) => {
+        this.livros = livros;
+      })
+      .catch((erro: any) => console.error("Erro ao carregar livros:", erro));
   }
 
-  excluir = (codigo: number): void => {
-    this.servLivros.excluir(codigo);
-    this.livros = this.servLivros.obterLivros();
-  };
+  excluir(codigo: string): void {
+  
+    this.servLivros
+      .excluir(codigo)
+      .then((resultado: boolean) => {
+        if (resultado) {
+          this.servLivros.obterLivros().then((livros: Livro[]) => {
+            this.livros = livros;
+          });
+        }
+      })
+      .catch((erro: any) => console.error("Erro ao excluir livro:", erro));
+  }
 
   obterNome = (codEditora: number): string | undefined => {
     return this.servEditora.getNomeEditora(codEditora);

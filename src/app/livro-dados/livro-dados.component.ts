@@ -7,6 +7,7 @@ import { Livro } from '../livro';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
+
 @Component({
   selector: 'app-livro-dados',
   standalone: true,
@@ -15,8 +16,8 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./livro-dados.component.css']
 })
 export class LivroDadosComponent implements OnInit {
-  public livro: Livro = new Livro(0, 0, '', '', []);
-  public autoresForm: string = '';  
+  public livro: Livro = new Livro();
+  public autoresForm: string = ''; // Recebe os autores como uma string do formulário
   public editoras: Array<Editora> = [];
 
   constructor(
@@ -29,9 +30,17 @@ export class LivroDadosComponent implements OnInit {
     this.editoras = this.servEditora.getEditoras();
   }
 
-  incluir = (): void => {
-    this.livro.autores = this.autoresForm.split('\n');
-    this.servLivros.incluir(this.livro);  
-    this.router.navigateByUrl('/lista');
-  };
+  incluir(): void {
+    // Atualiza o campo 'autores' no objeto 'livro'
+    this.livro.autores = this.autoresForm.split(',').map((autor) => autor.trim());
+
+    this.servLivros
+      .incluir(this.livro)
+      .then((resultado: boolean) => {
+        if (resultado) {
+          this.router.navigateByUrl('/lista');
+        }
+      })
+      .catch((erro: any) => console.error('Erro ao incluir livro:', erro));
+  }
 }

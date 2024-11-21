@@ -1,30 +1,55 @@
 import { Injectable } from '@angular/core';
 import { Livro } from './livro';
 
+const baseURL: string = "http://localhost:3030/livros";
+
+
+export interface LivroMongo {
+  _id: string | null;
+  codEditora: number;
+  titulo: string;
+  resumo: string;
+  autores: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ControleLivrosService {
-  private livros: Array<Livro> = [
-    { codigo: 1, codEditora: 1, titulo: 'Livro 1', resumo: 'Resumo do Livro 1', autores: ['Autor A'] },
-    { codigo: 2, codEditora: 2, titulo: 'Livro 2', resumo: 'Resumo do Livro 2', autores: ['Autor B', 'Autor C'] },
-    { codigo: 3, codEditora: 3, titulo: 'Livro 3', resumo: 'Resumo do Livro 3', autores: ['Autor D'] }
-  ];
 
-  obterLivros(): Array<Livro> {
-    return this.livros;
+  async obterLivros(): Promise<Livro[]> {
+    const response: Response = await fetch(baseURL, { method: "GET" });
+    const data: LivroMongo[] = await response.json();
+  
+    return data.map((item: LivroMongo): Livro => ({
+      codigo: item._id ?? "",
+      codEditora: item.codEditora,
+      titulo: item.titulo,
+      resumo: item.resumo,
+      autores: item.autores,
+    }));
   }
 
-  incluir(novoLivro: Livro): void {
-    const maxCodigo = Math.max(...this.livros.map(l => l.codigo), 0);
-    novoLivro.codigo = maxCodigo + 1;
-    this.livros.push(novoLivro);
+  async incluir(livro: Livro): Promise<boolean> {
+    const livroMongo: LivroMongo = {
+      _id: null,
+      codEditora: livro.codEditora,
+      titulo: livro.titulo,
+      resumo: livro.resumo,
+      autores: livro.autores,
+    };
+  
+    const response: Response = await fetch(baseURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(livroMongo),
+    });
+  
+    return response.ok;
   }
-
-  excluir(codigo: number): void {
-    const indice = this.livros.findIndex(l => l.codigo === codigo);
-    if (indice !== -1) {
-      this.livros.splice(indice, 1);
-    }
-  }
+  
+  async excluir(codigo: string): Promise<boolean> {
+    const response: Response = await fetch(`${baseURL}/${codigo}`, { method: "DELETE" });
+    return response.ok;
+  }  
 }
